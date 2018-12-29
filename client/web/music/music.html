@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="author" content="Andreas Reisenbauer">
+    <link rel="icon" href="../../favicon.ico">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.7.0/bootstrap-table.min.css">
+
+
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js'></script>        
+    <script type='text/javascript' src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.7.0/bootstrap-table.min.js"></script>
+    <!-- Latest compiled and minified Locales -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.7.0/locale/bootstrap-table-en-US.min.js"></script>
+    <meta name="description" content="Our Music Library - for online investigation">
+    <title>Music Library</title>    
+  </head>
+
+  <body>
+    <div class="container">
+
+      <div id='titles-view' class="row">
+        <div class="col-lg-1">
+        </div>
+  
+        <div class="col-lg-10">
+          <div id="title-toolbar" class="btn-group">
+            <button id='album-btn' type="button" class="btn btn-default" class="active">
+              <i class="glyphicon glyphicon-cd"></i> Albums
+            </button>
+          </div> 
+          <table data-toggle="table" data-url="/api/music/titles" data-striped=true 
+              data-search="true" 
+              data-pagination=true data-page-number=1 data-page-size=10 data-page-list=[10,20,50,100]
+              data-toolbar="#title-toolbar">
+            <thead>
+              <tr>
+                <th data-field="artist">Artist</th>
+                <th data-field="year">Published</th>
+                <th data-field="album">Album</th>
+                <th data-field="track">Track</th>
+                <th data-field="title">Title</th>
+                <th data-field="rating" data-formatter="ratingFormatter">Rating</th>
+                <th data-formatter="lengthFormatter">Length</th>
+                <th data-field="id" data-formatter="playBackFormatter"></th>
+              </tr>
+            </thead>
+          </table>  
+        </div>
+      </div>
+
+      <div id='album-view' class="row">
+        <div class="col-lg-1">
+        </div>
+  
+        <div class="col-lg-5">
+          <div id="album-toolbar" class="btn-group">
+            <button id='titles-btn' type="button" class="btn btn-default">
+              <i class="glyphicon glyphicon-music"></i> All Tracks
+            </button>
+          </div> 
+          <table id="eventsTable" data-toggle="table" data-url="/api/music/albums" data-striped=true 
+              data-search="true" 
+              data-pagination=true data-page-number=1 data-page-size=10 data-page-list=[10,20,50,100]
+              data-toolbar="#album-toolbar">
+            <thead>
+              <tr>
+                <th data-field="artist">Album Artist</th>
+                <th data-field="year">Published</th>
+                <th data-field="album">Album</th>
+                <th data-field="tracks">Tracks</th>
+  <!--               <th data-formatter="lengthFormatter">Length</th>
+  -->
+              </tr>
+            </thead>
+          </table>  
+        </div>
+
+<!-- data-url="/api/music/titles?albumId=45" 
+ -->      
+        <div class="col-lg-5">
+          <div id="album-title-toolbar" class="btn-group">
+            <p id='album-title-lbl'class="navbar-text navbar-right"></p>
+          </div> 
+            <table id="table-methods-table" data-toggle="table" data-striped=true 
+              data-search="true" 
+              data-toolbar="#album-title-toolbar" >
+              <thead>
+                <tr>
+                  <th data-field="artist">Artist</th>
+                  <th data-field="track">Track</th>
+                  <th data-field="title">Title</th>
+                  <th data-field="rating" data-formatter="ratingFormatter">Rating</th>
+                  <th data-formatter="lengthFormatter">Length</th>
+                  <th data-field="id" data-formatter="playBackFormatter"></th>
+                </tr>
+              </thead>
+            </table>  
+        </div>
+      </div>
+    </div>
+ 
+    <script>
+    "use strict";
+
+    function pad(num, size) { 
+      return ('000000000' + num).substr(-size); 
+    }
+    
+    function lengthFormatter(value, row, index) {
+      return Math.floor (row.len/60) + ":" + pad (row.len%60, 2);
+    }
+    
+    function ratingFormatter(value, row, index) {
+      if (typeof value !== 'undefined') {
+        return '<img src="assets/icons/rating' + pad (value*10, 2) + '.png" alt="Rating ' + value + '" >';
+      } else {
+        return '<img src="assets/icons/ratingNO.png" alt="No Rating" >';
+      }
+    }
+    
+    function playBackFormatter(value, row, index) {
+      // maybe this function has to be customized - as it expects the mp3 files to be downloaded as
+      //   http://<host>/music/<artist> - <leading zero 2 digit track#> - <title>.mp3?id=<titleId>
+      return '<a href="/music/' + encodeURIComponent (row.artist + ' - ' + pad (row.track, 2) + ' - ' + row.title + '.mp3') 
+        + '?id=' + value + '"><i class="glyphicon glyphicon-download-alt"></i></a>';   
+    }
+    
+    $(function() {
+      $('#titles-view').hide();
+      $('#eventsTable').on('click-row.bs.table', function (e, row, $element) {
+        console.log("Select AlbumId: ", row.id);
+        $('#table-methods-table').bootstrapTable('refresh', {
+                    url: '/api/music/titles?albumId='+row.id
+        });
+        $('#album-title-lbl')[0].innerHTML=row.artist + " (" + row.year + "): " + row.album;
+        
+      });
+      
+      $('#titles-btn').on('click', function (e) {
+        console.log ("Titles Button clicked");
+        $('#album-view').fadeOut('slide',function(){
+          $('#titles-view').fadeIn ();
+        });
+      });
+
+      $('#album-btn').on('click', function (e) {
+        console.log ("Album Button clicked");
+        $('#titles-view').fadeOut('slide',function(){
+          $('#album-view').fadeIn ();
+        });
+      });
+
+    });
+    </script>
+
+
+    
+  </body>
+ </html>

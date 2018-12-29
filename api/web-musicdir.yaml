@@ -1,0 +1,151 @@
+---
+swagger: "2.0"
+info:
+  description: "An API for a web based Music Directory"
+  version: "0.1.0"
+  title: "Web-Music-Dir"
+  contact:
+    name: "Andreas Reisenbauer"
+    email: "reisenba@gmx.at"
+basePath: "/api/music"
+schemes:
+- "http"
+produces:
+- "application/json"
+paths:
+  /albums:
+    get:
+      tags:
+      - "Music"
+      description: >
+        Get all albums we have got in our collection
+      operationId: "getAlbums"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "albums response"
+          schema: 
+            $ref: "#/definitions/albums"
+        400:
+          description: "user-name OR role-name are not given"
+          schema:
+            $ref: "#/definitions/status-message"
+        default:
+          description: "unexpected error"
+      x-swagger-router-controller: "MusicService"
+  /titles:
+    get:
+      tags:
+      - "Music"
+      description: >
+        retrieves titles we have got in our collection
+        search might be limited by albumID
+      operationId: "getTitles"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "albumId"
+        in: "query"
+        type: "integer"
+      responses:
+        200:
+          description: "titles response"
+          schema: 
+            $ref: "#/definitions/titles"
+        404:
+          description: "album not found"
+          schema:
+            $ref: "#/definitions/status-message"
+        default:
+          description: "unexpected error"
+      x-swagger-router-controller: "MusicService"
+  /version:
+    get:
+      tags: 
+      - "Music"
+      description: "Returns actual API Package and Git Version"
+      operationId: "statusVersion"
+      responses:
+        200:
+          description: "returns current API Package and Git Version"
+          schema:
+            $ref: "#/definitions/status-message"
+        default:
+          description: "unexpected error"
+      x-swagger-router-controller: "MusicService"
+definitions:
+  albums:
+    type: "array"
+    items:
+      $ref: "#/definitions/album"
+    description: >
+      array of albums we have in our collection
+  album:
+    properties:
+      id:
+        type: "integer"
+        description: "unique identifier of this album"
+      artist:
+        type: "string"
+        description: >
+          Artist Name
+      year:
+        type: "integer"
+        description: "release year of the album"
+      album:
+        type: "string"
+        description: "name of the album"
+      cover:
+        type: "string"
+        description: "path name of the album cover"
+      tracks:
+        type: "integer"
+        description: "number of tracks on this album"
+  titles:
+    type: "array"
+    items:
+      $ref: "#/definitions/title"
+    description: >
+      array of titles we have in our collection
+  title:
+    properties:
+      id:
+        type: "integer"
+        description: "unique identifier of this title"
+      artist:
+        type: "string"
+        description: >
+          Artist Name
+      year:
+        type: "integer"
+        description: "release year of the title"
+      album:
+        type: "string"
+        description: "name of the album"
+      albumId:
+        type: "integer"
+        description: "unique identifier of the album"
+      track:
+        type: "integer"
+        description: "track number on the album of this title"
+      title:
+        type: "string"
+        description: "name of the title"
+      rating:
+        type: "number"
+        description: "the rating as part of the ID3 parameters from 0..5"
+      len:
+        type: "integer"
+        description: "length of the track in seconds"
+  status-message:
+    properties:
+      name:
+        type: "string"
+        description: "package name"
+      package-version:
+        type: "string"
+        description: "package version information"
+      git-version:
+        type: "string"
+        description: "git version information (not guaranteed)"

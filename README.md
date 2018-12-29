@@ -48,11 +48,6 @@ also allows to download certain titles as mp3 file
 this is how it looks at home for me
 ![Screenshot-web](docs/screenshot-web.png "Screenshot")
 
-# Config
-pls check /config-template for the easiest config file in yaml format. I do not want to expose my working example here, but 
-am optimistic enough to guess everybody who wants to easily can adapt for his needs. Once your config file is composed make it available
-below /config in production environment
-
 # Deployment as docker container
 * serves port 8106
 * expects data/music.album.json and data/music.title.json as volume mount
